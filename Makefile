@@ -12,7 +12,7 @@ CFLAGS += -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
 BIN = winos.bin
 
-OBJS = kernel.o
+OBJS = kernel.o xprintf.o
 
 all: $(BIN)
 

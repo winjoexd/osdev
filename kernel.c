@@ -15,7 +15,9 @@
 #if !defined(__i386__)
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
 #endif
- 
+
+#include "xprintf.h"
+
 /* Hardware text mode color constants. */
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
@@ -112,9 +114,9 @@ void kernel_main(void) {
 	size_t i = 0;
 	/* Initialize terminal interface */
 	terminal_initialize();
- 
-	/* Newline support is left as an exercise. */
-	for(i=0; i<999;i++) {
-		terminal_writestring("Hello, win kernel World!\n");
+	xdev_out(terminal_putchar);
+
+	for(i=0; i<90;i++) {
+		xprintf("wintest, %d:\n", i);
 	}
 }
