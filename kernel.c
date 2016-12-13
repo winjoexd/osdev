@@ -84,16 +84,24 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
 }
  
 void terminal_putchar(char c) {
+	size_t i = 0;
 	if(c == '\n') {
 		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
+		if (++terminal_row == VGA_HEIGHT) {
+			terminal_row = VGA_HEIGHT - 1;
+			for(i = 0; i < VGA_WIDTH * (VGA_HEIGHT - 1); i++) {
+				terminal_buffer[i] = terminal_buffer[i + VGA_WIDTH];
+			}
+			for(i = VGA_WIDTH * (VGA_HEIGHT - 1); i < VGA_WIDTH * VGA_HEIGHT; i++) {
+				terminal_buffer[i] = ' ';
+			}
+		}
 	} else {
 		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
 		if (++terminal_column == VGA_WIDTH) {
 			terminal_column = 0;
 			if (++terminal_row == VGA_HEIGHT)
-				terminal_row = 0;
+				terminal_row = VGA_HEIGHT - 1;
 		}
 	}
 }
@@ -116,7 +124,7 @@ void kernel_main(void) {
 	terminal_initialize();
 	xdev_out(terminal_putchar);
 
-	for(i=0; i<90;i++) {
+	for(i=0; i<60000;i++) {
 		xprintf("wintest, %d:\n", i);
 	}
 }
