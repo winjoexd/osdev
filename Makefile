@@ -1,36 +1,38 @@
-# editor by win
+GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
+ASPARAMS = --32
+LDPARAMS = -melf_i386
 
-CROSS_COMPILE = i686-elf-
-AR = $(CROSS_COMPILE)ar
-AS = $(CROSS_COMPILE)as
-CC = $(CROSS_COMPILE)gcc
-LD = $(CROSS_COMPILE)ld
-CPP = $(CROSS_COMPILE)cpp
-STRIP = $(CROSS_COMPILE)strip
+objects = loader.o gdt.o kernel.o
 
-CFLAGS += -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+%.o: %.cpp
+	gcc $(GCCPARAMS) -c -o $@ $<
 
-BIN = winos.bin
+%.o: %.s
+	as $(ASPARAMS) -o $@ $<
 
-OBJS = kernel.o xprintf.o
+mykernel.bin: linker.ld $(objects)
+	ld $(LDPARAMS) -T $< -o $@ $(objects)
 
-all: $(BIN)
+mykernel.iso: mykernel.bin
+	mkdir iso
+	mkdir iso/boot
+	mkdir iso/boot/grub
+	cp mykernel.bin iso/boot/mykernel.bin
+	echo 'set timeout=0'                      > iso/boot/grub/grub.cfg
+	echo 'set default=0'                     >> iso/boot/grub/grub.cfg
+	echo ''                                  >> iso/boot/grub/grub.cfg
+	echo 'menuentry "My Operating System" {' >> iso/boot/grub/grub.cfg
+	echo '  multiboot /boot/mykernel.bin'    >> iso/boot/grub/grub.cfg
+	echo '  boot'                            >> iso/boot/grub/grub.cfg
+	echo '}'                                 >> iso/boot/grub/grub.cfg
+	grub-mkrescue --output=mykernel.iso iso
+	rm -rf iso
 
-boot.o: boot.s
-	$(AS) $^ -o $@
+run: mykernel.iso
+	qemu-system-i386 -cdrom ./mykernel.iso -m 64M
 
-winos.bin: boot.o $(OBJS)
-	$(CC) -T linker.ld -o $@ -ffreestanding -O2 -nostdlib -lgcc $^
+#install: mykernel.bin
+#	sudo cp $< /boot/mykernel.bin
 
 clean:
-	rm -f *.o
-	rm -f $(BIN)
-
-run: $(BIN)
-	qemu-system-i386 -kernel $(BIN)
-
-# Implicit rules
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-
+	rm -f $(objects) mykernel.bin mykernel.iso
