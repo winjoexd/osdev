@@ -75,7 +75,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
             printf("t");
             break;
         case 0x15:
-            printf("z");
+            printf("y");
             break;
         case 0x16:
             printf("u");
@@ -119,7 +119,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
             break;
 
         case 0x2C:
-            printf("y");
+            printf("z");
             break;
         case 0x2D:
             printf("x");
