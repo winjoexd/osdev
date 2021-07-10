@@ -1,4 +1,3 @@
-
 use volatile::Volatile;
 use core::fmt;
 use lazy_static::lazy_static;
